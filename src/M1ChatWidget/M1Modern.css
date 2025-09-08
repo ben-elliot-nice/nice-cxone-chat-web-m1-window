@@ -1,0 +1,447 @@
+/* M1 Modern Chat Theme - Custom Message Layout */
+
+/* CSS Variables for consistent theming */
+:root {
+  --m1-primary: #ff9e1b;
+  --m1-primary-dark: #e68900;
+  --m1-secondary: #0084ff;
+  --m1-customer-accent: #0084ff;
+  --m1-background: #f3f3f8;
+  --m1-surface: #ffffff;
+  --m1-border: #e0e4e7;
+  --m1-text-primary: #1a1a1a;
+  --m1-text-secondary: #666666;
+  --m1-radius-sm: 8px;
+  --m1-radius-md: 12px;
+  --m1-radius-lg: 16px;
+  --m1-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --m1-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* Chat Widget Container */
+.chat-widget {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 30vw;
+  height: 60vh;
+  min-width: 350px;
+  min-height: 400px;
+  background: var(--m1-surface);
+  border-radius: var(--m1-radius-lg);
+  box-shadow: var(--m1-shadow-md);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 1000;
+  animation: slideUp 0.3s ease-out;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+}
+
+/* Chat Header */
+.chat-header {
+  background: linear-gradient(135deg, #ffcc00 0%, var(--m1-primary) 100%);
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+  min-height: 44px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.chat-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.back-btn,
+.control-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.back-btn:hover,
+.control-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+  transform: scale(1.1);
+}
+
+.chat-controls {
+  display: flex;
+  gap: 8px;
+}
+
+/* Chat Body */
+.chat-body {
+  flex: 1;
+  background: var(--m1-background);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Messages Board Container */
+.messages-board {
+  padding: 15px !important;
+  background: transparent !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  flex: 1 !important;
+}
+
+/* Message Container Styling */
+.chat-body .message-container {
+  display: flex !important;
+  flex-direction: column !important;
+  margin: 8px 0 !important;
+  gap: 4px !important;
+  width: fit-content !important;
+  max-width: 75% !important;
+}
+
+/* Custom Message Structure Styling */
+.chat-body .message {
+  padding: 8px 12px !important;
+  border-radius: var(--m1-radius-lg) !important;
+  box-shadow: var(--m1-shadow-sm) !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  transition: transform 0.1s ease !important;
+  position: relative !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  word-wrap: break-word !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+/* Message Header Styling */
+.message-header {
+  display: flex !important;
+  align-items: center !important;
+  margin-bottom: 4px !important;
+  padding-bottom: 2px !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Author Styling */
+.message-author {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  opacity: 0.9 !important;
+  text-transform: capitalize !important;
+  letter-spacing: 0.025em !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  padding: 2px 6px !important;
+  border-radius: 8px !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  display: inline-block !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Timestamp below message bubble */
+.message-timestamp {
+  font-size: 11px !important;
+  font-weight: 400 !important;
+  opacity: 0.6 !important;
+  color: var(--m1-text-secondary) !important;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
+  margin-top: 2px !important;
+  padding: 0 8px !important;
+}
+
+/* Message Content Styling */
+.message-content {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+}
+
+.message-content p {
+  margin: 0 !important;
+  color: var(--m1-text-primary) !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+}
+
+/* Customer Message Container (User) Styling */
+.chat-body .user-message-container {
+  align-self: flex-end !important;
+  align-items: flex-end !important;
+  margin-left: auto !important;
+}
+
+.chat-body .user-message-container .message-timestamp {
+  text-align: right !important;
+}
+
+/* Agent Message Container (Bot) Styling */
+.chat-body .bot-message-container {
+  align-self: flex-start !important;
+  align-items: flex-start !important;
+  margin-right: auto !important;
+}
+
+.chat-body .bot-message-container .message-timestamp {
+  text-align: left !important;
+}
+
+/* Customer Message (User) Styling */
+.chat-body .user-message {
+  background: linear-gradient(135deg, #e8f4fd 0%, #d4e9fb 100%) !important;
+  border-radius: var(--m1-radius-lg) var(--m1-radius-lg) 4px var(--m1-radius-lg) !important;
+  border: 1px solid rgba(0, 132, 255, 0.1) !important;
+  color: var(--m1-text-primary) !important;
+}
+
+.user-message .message-author {
+  color: #ffffff !important;
+  background: linear-gradient(135deg, var(--m1-customer-accent) 0%, #0066cc 100%) !important;
+  box-shadow: 0 2px 4px rgba(0, 132, 255, 0.2) !important;
+}
+
+.user-message .message-author:hover {
+  transform: scale(1.02) !important;
+  box-shadow: 0 3px 6px rgba(0, 132, 255, 0.3) !important;
+}
+
+/* Agent Message (Bot) Styling */
+.chat-body .bot-message {
+  background: white !important;
+  border-radius: var(--m1-radius-lg) var(--m1-radius-lg) var(--m1-radius-lg) 4px !important;
+  border: 1px solid var(--m1-border) !important;
+  color: var(--m1-text-primary) !important;
+}
+
+.bot-message .message-author {
+  color: #ffffff !important;
+  background: linear-gradient(135deg, var(--m1-primary) 0%, var(--m1-primary-dark) 100%) !important;
+  box-shadow: 0 2px 4px rgba(255, 158, 27, 0.2) !important;
+}
+
+.bot-message .message-author:hover {
+  transform: scale(1.02) !important;
+  box-shadow: 0 3px 6px rgba(255, 158, 27, 0.3) !important;
+}
+
+/* System Message Styling */
+.system-message {
+  align-self: center !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  font-style: italic !important;
+  color: var(--m1-text-secondary) !important;
+  font-size: 12px !important;
+  text-align: center !important;
+  padding: 5px 10px !important;
+  opacity: 0.7 !important;
+}
+
+/* Agent Typing Indicator */
+.agent-typing {
+  padding: 8px 14px !important;
+  color: var(--m1-text-secondary) !important;
+  font-size: 14px !important;
+  font-style: italic !important;
+  background: white !important;
+  margin: 5px 0 !important;
+  border-radius: var(--m1-radius-lg) var(--m1-radius-lg) var(--m1-radius-lg) 4px !important;
+  box-shadow: var(--m1-shadow-sm) !important;
+  align-self: flex-start !important;
+  max-width: fit-content !important;
+}
+
+/* Customer Name Input */
+.customer-name-container {
+  padding: 12px !important;
+  background: white !important;
+  border-radius: var(--m1-radius-lg) !important;
+  margin-bottom: 10px !important;
+  box-shadow: var(--m1-shadow-sm) !important;
+}
+
+.customer-name-container .MuiTextField-root {
+  width: 100% !important;
+}
+
+.customer-name-container .MuiOutlinedInput-root {
+  border-radius: var(--m1-radius-md) !important;
+  font-size: 14px !important;
+}
+
+/* Send Message Form Styling */
+.send-message-form {
+  padding: 15px !important;
+  background: white !important;
+  border-top: 1px solid var(--m1-border) !important;
+  display: flex !important;
+  gap: 12px !important;
+  align-items: flex-end !important;
+}
+
+.send-message-form .MuiTextField-root {
+  flex: 1 !important;
+}
+
+.send-message-form .MuiOutlinedInput-root {
+  background: var(--m1-background) !important;
+  border-radius: 24px !important;
+  font-size: 14px !important;
+  transition: all 0.2s ease !important;
+}
+
+.send-message-form .MuiOutlinedInput-root:hover {
+  background: #f8f9fa !important;
+}
+
+.send-message-form .MuiOutlinedInput-root.Mui-focused {
+  background: white !important;
+  box-shadow: 0 0 0 2px rgba(255, 158, 27, 0.2) !important;
+}
+
+.send-message-form .MuiOutlinedInput-input {
+  padding: 12px 16px !important;
+  font-size: 14px !important;
+  color: var(--m1-text-primary) !important;
+  line-height: 1.5 !important;
+}
+
+.send-message-form .MuiOutlinedInput-notchedOutline {
+  border: 1px solid var(--m1-border) !important;
+  border-radius: 24px !important;
+}
+
+.send-message-form .MuiInputLabel-root {
+  display: none !important;
+}
+
+.send-message-form .MuiIconButton-root {
+  color: var(--m1-primary) !important;
+  background: rgba(255, 158, 27, 0.1) !important;
+  border-radius: 50% !important;
+  padding: 10px !important;
+  transition: all 0.2s ease !important;
+}
+
+.send-message-form .MuiIconButton-root:hover {
+  background: rgba(255, 158, 27, 0.2) !important;
+  transform: scale(1.05) !important;
+}
+
+/* Scrollbar Styling */
+.chat-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 158, 27, 0.2);
+  border-radius: 3px;
+}
+
+.chat-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 158, 27, 0.3);
+}
+
+/* Widget States */
+.chat-widget.minimized {
+  height: 44px;
+}
+
+.chat-widget.minimized .chat-body,
+.chat-widget.minimized .send-message-form {
+  display: none;
+}
+
+.chat-widget.fullscreen {
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 0;
+  max-width: none;
+  max-height: none;
+}
+
+/* Animation */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .chat-widget {
+    width: 90%;
+    right: 5%;
+    left: 5%;
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-widget {
+    width: 100%;
+    height: 100%;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    border-radius: 0;
+  }
+}
+
+/* Hover Effects */
+.message:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Loading States */
+.message-loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* Message Animations */
+@keyframes messageSlideIn {
+  from {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.message {
+  animation: messageSlideIn 0.3s ease-out;
+}

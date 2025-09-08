@@ -1,19 +1,20 @@
-import { Alert } from '@mui/material';
 import ChatSdk, {
   Thread,
   ThreadIdOnExternalPlatform,
 } from '@nice-devone/nice-cxone-chat-web-sdk';
 import { FC, useEffect, useState } from 'react';
-import { ChatWindow } from '../Chat/ChatWindow';
+import { M1ChatWrapper } from '../M1ChatWidget/M1ChatWrapper';
 
 interface MessengerWindowProps {
   sdk: ChatSdk;
   threadId: ThreadIdOnExternalPlatform;
+  onBack?: () => void;
 }
 
 export const MessengerWindow: FC<MessengerWindowProps> = ({
   sdk,
   threadId,
+  onBack,
 }) => {
   const [thread, setThread] = useState<Thread | null>(null);
 
@@ -26,18 +27,15 @@ export const MessengerWindow: FC<MessengerWindowProps> = ({
     loadThread();
   }, [sdk, threadId]);
 
+  if (!thread) return null;
+
   return (
-    <div>
-      <Alert icon={false} severity="success">
-        Messenger
-      </Alert>
-      {thread ? (
-        <div className="chat-container">
-          <div className="chat-window">
-            <ChatWindow sdk={sdk} thread={thread} />
-          </div>
-        </div>
-      ) : null}
-    </div>
+    <M1ChatWrapper 
+      sdk={sdk} 
+      thread={thread}
+      onBack={onBack}
+      showBackButton={!!onBack}
+      title="Ask Mindy"
+    />
   );
 };

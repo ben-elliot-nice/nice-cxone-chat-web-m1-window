@@ -1,16 +1,20 @@
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import EditIcon from '@mui/icons-material/Edit';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import {
+  Button,
   Dialog,
+  DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
-  IconButton,
-  InputAdornment,
-  InputLabel,
   TextField,
   Typography,
+  Box,
+  Chip,
+  Tooltip,
 } from '@mui/material';
 import { FC, useCallback, useRef, useState } from 'react';
-import SendIcon from '@mui/icons-material/Send';
 
 interface CustomerProps {
   onChange: (name: string) => void;
@@ -31,35 +35,103 @@ export const Customer: FC<CustomerProps> = ({ name, onChange }) => {
     handleOnClose();
   }, [handleOnClose, onChange]);
 
+  const handleKeyPress = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === 'Enter') {
+      handleSubmit();
+    }
+  }, [handleSubmit]);
+
   return (
     <>
-      <Dialog open={dialogOpen} onClose={handleOnClose}>
-        <DialogTitle>Set your name</DialogTitle>
+      <Dialog open={dialogOpen} onClose={handleOnClose} maxWidth="xs" fullWidth>
+        <DialogTitle>
+          {name ? 'Update Your Name' : 'Enter Your Name'}
+        </DialogTitle>
         <DialogContent>
-          <InputLabel htmlFor="input-with-icon-adornment">Your name</InputLabel>
+          <DialogContentText sx={{ mb: 2 }}>
+            {name 
+              ? 'Change how you appear to agents in this chat.'
+              : 'Please enter your name to start the conversation. This helps agents provide you with personalized support.'}
+          </DialogContentText>
           <TextField
             inputRef={nameInputRef}
             defaultValue={name}
             autoFocus
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <AccountCircleIcon />
-                </InputAdornment>
-              ),
-            }}
+            fullWidth
+            label="Your Name"
+            placeholder="Enter your name here"
+            variant="outlined"
+            onKeyPress={handleKeyPress}
+            sx={{ mt: 1 }}
           />
-          <IconButton onClick={handleSubmit}>
-            <SendIcon color="primary" />
-          </IconButton>
         </DialogContent>
+        <DialogActions>
+          <Button onClick={handleOnClose} color="inherit">
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} variant="contained" color="primary">
+            {name ? 'Update' : 'Set Name'}
+          </Button>
+        </DialogActions>
       </Dialog>
-      <IconButton onClick={handleDialogOpenClick}>
-        <AccountCircleIcon />
-        <Typography padding={1} fontSize={14}>
-          {name}
-        </Typography>
-      </IconButton>
+      
+      <Box sx={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: 1, 
+        p: 1,
+        borderRadius: 1,
+        backgroundColor: 'background.paper',
+        border: '1px solid',
+        borderColor: 'divider',
+      }}>
+        {name ? (
+          <Tooltip title="Click to change your name">
+            <Chip
+              icon={<AccountCircleIcon />}
+              label={name}
+              onClick={handleDialogOpenClick}
+              onDelete={handleDialogOpenClick}
+              deleteIcon={<EditIcon fontSize="small" />}
+              variant="outlined"
+              color="primary"
+              sx={{
+                cursor: 'pointer',
+                '&:hover': {
+                  backgroundColor: 'action.hover',
+                  borderColor: 'primary.main',
+                },
+                fontSize: '0.875rem',
+                fontWeight: 500,
+              }}
+            />
+          </Tooltip>
+        ) : (
+          <Tooltip title="Set your name to start chatting">
+            <Button
+              startIcon={<PersonAddIcon />}
+              onClick={handleDialogOpenClick}
+              variant="outlined"
+              size="small"
+              sx={{
+                textTransform: 'none',
+                borderStyle: 'dashed',
+                '&:hover': {
+                  borderStyle: 'solid',
+                  backgroundColor: 'action.hover',
+                },
+              }}
+            >
+              Set Your Name
+            </Button>
+          </Tooltip>
+        )}
+        {!name && (
+          <Typography variant="caption" color="text.secondary">
+            Required to start chat
+          </Typography>
+        )}
+      </Box>
     </>
   );
 };

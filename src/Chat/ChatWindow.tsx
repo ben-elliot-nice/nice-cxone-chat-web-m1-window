@@ -20,7 +20,6 @@ import { SendMessageForm } from './SendMessageForm/SendMessageForm';
 import { Customer } from './Customer/Customer';
 import { useWindowFocus } from '../hooks/focus';
 import { parseAgentName } from './Agent/agentName';
-import { Typography } from '@mui/material';
 import { mergeMessages } from '../state/messages/mergeMessages';
 import { STORAGE_CHAT_CUSTOMER_NAME } from '../constants';
 import { AgentTyping } from './Agent/AgentTyping';
@@ -108,6 +107,7 @@ export const ChatWindow: FC<ChatWindowProps> = ({ sdk, thread }) => {
 
   const handleMessageAdded = useCallback(
     (event: CustomEvent<ChatEventData>) => {
+      console.log('Message created event:', event);
       if (!isMessageCreatedEvent(event.detail)) {
         return;
       }
@@ -241,11 +241,6 @@ export const ChatWindow: FC<ChatWindowProps> = ({ sdk, thread }) => {
         loadMoreMessages={handleLoadMoreMessages}
         onPostback={handlePostback}
       />
-      {agentName === null ? null : (
-        <Typography variant="subtitle2" gutterBottom>
-          You are talking with {agentName}
-        </Typography>
-      )}
       {agentTyping ? <AgentTyping /> : null}
       <SendMessageForm
         onSubmit={handleSendMessage}

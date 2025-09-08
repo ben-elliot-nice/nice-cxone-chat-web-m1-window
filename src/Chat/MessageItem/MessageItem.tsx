@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader } from '@mui/material';
 import './MessageItem.css';
 import { getAuthor, Message } from '@nice-devone/nice-cxone-chat-web-sdk';
 import { FC } from 'react';
@@ -15,33 +14,32 @@ interface MessageItemProps {
 }
 
 export const MessageItem: FC<MessageItemProps> = ({ message, onAction }) => {
+  const isCustomer = message.direction === 'inbound';
+  const author = getAuthor(message);
+  const timestamp = new Date(message.createdAt).toLocaleTimeString([], { 
+    hour: '2-digit', 
+    minute: '2-digit' 
+  });
+
   return (
-    <div
-      className={`message-item ${
-        message.direction === 'outbound'
-          ? 'message-item__outbound'
-          : 'message-item__inbound'
-      }`}
-    >
-      <Card
-        className="message-item-card"
+    <div className={`message-container ${isCustomer ? 'user-message-container' : 'bot-message-container'}`}>
+      <div
+        className={`message ${isCustomer ? 'user-message' : 'bot-message'}`}
         data-testid="message-item"
         data-id={message.id}
       >
-        <CardHeader
-          subheader={getAuthor(message)}
-          subheaderTypographyProps={{ fontSize: '12px' }}
-        />
-        <CardContent>
+        {!isCustomer && (
+          <div className="message-header">
+            <span className="message-author">{author}</span>
+          </div>
+        )}
+        <div className="message-content">
           <MessageAttachments attachments={message.attachments} />
           <MessageText text={message.messageContent.payload.text} />
           <MessageRichContent message={message} onAction={onAction} />
-        </CardContent>
-        <CardHeader
-          subheader={new Date(message.createdAt).toLocaleString()}
-          subheaderTypographyProps={{ fontSize: '12px' }}
-        />
-      </Card>
+        </div>
+      </div>
+      <div className="message-timestamp">{timestamp}</div>
     </div>
   );
 };

@@ -1,0 +1,470 @@
+/* M1 Singapore Theme CSS - Refined Version */
+
+:root {
+  /* M1 Brand Colors */
+  --m1-orange-primary: #ff9e1b;
+  --m1-orange-secondary: #ffcc00;
+  --m1-black: #000000;
+  --m1-white: #ffffff;
+  --m1-gray-light: #f3f3f8;
+  --m1-gray-medium: #c4d1d8;
+  --m1-gray-text: #333333;
+  --m1-link-blue: #2873c0;
+  --m1-hover-blue: #144271;
+  --m1-message-bg: #e3f2fd;
+  --m1-border-light: #e0e0e0;
+  --m1-shadow: rgba(0, 0, 0, 0.15);
+  --m1-shadow-light: rgba(0, 0, 0, 0.1);
+}
+
+/* Font Import */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+/* Global Font */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif !important;
+  background-color: #f5f5f5;
+}
+
+/* Main Chat Container - Fixed positioning for widget style */
+.chat-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 30vw;
+  height: 60vh;
+  min-width: 400px;
+  min-height: 500px;
+  max-width: 500px;
+  max-height: 700px;
+  background: var(--m1-white);
+  border-radius: 10px;
+  box-shadow: 0 2px 15px var(--m1-shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 1000;
+  padding: 0;
+}
+
+/* Chat Window */
+.chat-window {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0;
+  background: var(--m1-gray-light);
+  flex: 1;
+}
+
+/* Header Styling - M1 Orange Gradient */
+.MuiAlert-root {
+  border-radius: 0 !important;
+  margin: 0 !important;
+}
+
+.MuiAlert-success {
+  background: linear-gradient(to right, var(--m1-orange-secondary) 0%, var(--m1-orange-primary) 100%) !important;
+  color: var(--m1-black) !important;
+  border-radius: 10px 10px 0 0 !important;
+  padding: 12px 20px !important;
+  min-height: 45px;
+  display: flex;
+  align-items: center;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1) !important;
+}
+
+.MuiAlert-message {
+  padding: 0 !important;
+  font-weight: 600 !important;
+}
+
+/* Back Link */
+.multithread-back-link {
+  color: var(--m1-orange-primary);
+  padding: 8px 16px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+  transition: color 0.2s ease;
+  background: var(--m1-white);
+  margin: 10px;
+  border-radius: 18px;
+  box-shadow: 0 1px 4px var(--m1-shadow-light);
+}
+
+.multithread-back-link:hover {
+  color: var(--m1-hover-blue);
+  background: var(--m1-gray-light);
+  cursor: pointer;
+}
+
+/* Messages Board */
+.messages-board {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--m1-gray-light);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Scrollbar Styling */
+.messages-board::-webkit-scrollbar {
+  width: 6px;
+}
+
+.messages-board::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.messages-board::-webkit-scrollbar-thumb {
+  background: rgba(16, 0, 107, 0.1);
+  border-radius: 3px;
+}
+
+.messages-board::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 0, 107, 0.2);
+}
+
+/* Message Items */
+.message-item {
+  margin: 8px 0;
+  display: flex;
+  padding: 0 10px;
+  max-width: 100%;
+}
+
+/* Customer messages (inbound) - align right */
+.message-item__inbound {
+  align-self: flex-end;
+  justify-content: flex-end;
+  margin-left: auto;
+  max-width: 70%;
+}
+
+/* Agent messages (outbound) - align left */
+.message-item__outbound {
+  align-self: flex-start;
+  justify-content: flex-start;
+  margin-right: auto;
+  max-width: 70%;
+}
+
+/* Message Cards */
+.message-item-card,
+.message-item .MuiCard-root {
+  box-shadow: 0 1px 4px var(--m1-shadow-light) !important;
+  font-size: 14px;
+  line-height: 1.5;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Customer message styling */
+.message-item__inbound .message-item-card,
+.message-item__inbound .MuiCard-root {
+  background-color: var(--m1-message-bg) !important;
+  border-radius: 18px 18px 0 18px;
+}
+
+/* Agent message styling */
+.message-item__outbound .message-item-card,
+.message-item__outbound .MuiCard-root {
+  background-color: var(--m1-white) !important;
+  border-radius: 0 18px 18px 18px;
+}
+
+.MuiCardContent-root {
+  padding: 10px 14px !important;
+  color: var(--m1-gray-text);
+}
+
+.MuiCardContent-root:last-child {
+  padding-bottom: 10px !important;
+}
+
+/* System Messages */
+.system-message {
+  text-align: center;
+  padding: 8px;
+  color: var(--m1-gray-text);
+  font-size: 12px;
+  font-style: italic;
+  opacity: 0.7;
+}
+
+/* Send Message Form */
+.send-message-form {
+  padding: 12px;
+  background: var(--m1-white);
+  border-top: 1px solid var(--m1-border-light);
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+/* Text Input Field */
+.send-message-form-text-input {
+  flex: 1;
+  padding: 0 !important;
+}
+
+.send-message-form .MuiTextField-root {
+  flex: 1;
+}
+
+.send-message-form .MuiOutlinedInput-root {
+  background: var(--m1-white);
+  border-radius: 20px;
+  font-size: 14px;
+  padding: 0;
+}
+
+.send-message-form .MuiOutlinedInput-input {
+  padding: 10px 14px !important;
+  font-size: 14px;
+  color: var(--m1-black);
+}
+
+.send-message-form .MuiInputLabel-root {
+  display: none;
+}
+
+.send-message-form .MuiOutlinedInput-notchedOutline {
+  border: 1px solid var(--m1-border-light);
+  border-radius: 20px;
+}
+
+.send-message-form .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: var(--m1-orange-primary);
+}
+
+.send-message-form .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--m1-orange-primary);
+  border-width: 2px;
+}
+
+/* Send Button */
+.send-message-form .MuiIconButton-root {
+  background: transparent;
+  color: var(--m1-orange-primary);
+  padding: 8px;
+  transition: background-color 0.2s;
+}
+
+.send-message-form .MuiIconButton-root:hover {
+  background: rgba(255, 158, 27, 0.1);
+}
+
+.send-message-form .MuiIconButton-root:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Thread List */
+.MuiList-root {
+  background: var(--m1-gray-light);
+  height: 100%;
+  overflow-y: auto;
+}
+
+.MuiListItem-root {
+  background: var(--m1-white);
+  border-radius: 18px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 4px var(--m1-shadow-light);
+  transition: all 0.2s;
+}
+
+.MuiListItemButton-root {
+  border-radius: 18px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  background: var(--m1-white);
+  box-shadow: 0 1px 4px var(--m1-shadow-light);
+  transition: all 0.2s;
+}
+
+.MuiListItem-root:hover,
+.MuiListItemButton-root:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px var(--m1-shadow-light);
+  background: var(--m1-gray-light);
+}
+
+.MuiListItemText-primary {
+  color: var(--m1-gray-text);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.MuiListItemText-secondary {
+  color: var(--m1-gray-text);
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.MuiListItemIcon-root {
+  color: var(--m1-orange-primary);
+  min-width: 40px;
+}
+
+/* Typography */
+.MuiTypography-root {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+}
+
+/* Agent Typing Indicator */
+.agent-typing {
+  padding: 8px 14px;
+  color: var(--m1-gray-text);
+  font-size: 14px;
+  font-style: italic;
+  background: var(--m1-white);
+  margin: 5px 15px;
+  border-radius: 0 18px 18px 18px;
+  box-shadow: 0 1px 4px var(--m1-shadow-light);
+  display: inline-block;
+  max-width: fit-content;
+}
+
+/* File Upload Button */
+.file-upload-button {
+  color: var(--m1-orange-primary);
+}
+
+.file-upload-button:hover {
+  background: rgba(255, 158, 27, 0.1);
+}
+
+/* Links in Messages */
+.message-item a {
+  color: var(--m1-link-blue);
+  text-decoration: underline;
+}
+
+.message-item a:hover {
+  color: var(--m1-hover-blue);
+}
+
+/* Loading Spinner */
+.loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.loader .MuiCircularProgress-root {
+  color: var(--m1-orange-primary) !important;
+}
+
+/* Customer Name Input */
+.customer-name-container .MuiTextField-root {
+  margin: 10px;
+}
+
+.customer-name-container .MuiOutlinedInput-root {
+  background: var(--m1-white);
+  border-radius: 18px;
+  font-size: 14px;
+}
+
+.customer-name-container .MuiOutlinedInput-notchedOutline {
+  border: 1px solid var(--m1-orange-primary);
+  border-radius: 18px;
+}
+
+/* Rich Content / Postback Buttons */
+.postback-button,
+.message-item button {
+  background: transparent;
+  border: 1px solid var(--m1-orange-primary);
+  color: var(--m1-orange-primary);
+  padding: 6px 12px;
+  border-radius: 18px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin: 4px;
+}
+
+.postback-button:hover,
+.message-item button:hover {
+  background: var(--m1-orange-primary);
+  color: var(--m1-white);
+}
+
+/* Override Material UI Defaults */
+.MuiButton-containedPrimary {
+  background: var(--m1-orange-primary);
+  color: var(--m1-white);
+  border-radius: 18px;
+}
+
+.MuiButton-containedPrimary:hover {
+  background: var(--m1-orange-secondary);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .chat-container {
+    width: 40vw;
+    min-width: 350px;
+  }
+}
+
+@media (max-width: 768px) {
+  .chat-container {
+    width: calc(100% - 20px);
+    height: calc(100% - 20px);
+    max-width: none;
+    max-height: none;
+    bottom: 10px;
+    right: 10px;
+    left: 10px;
+    top: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-container {
+    width: 100%;
+    height: 100%;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    border-radius: 0;
+    max-width: none;
+    max-height: none;
+  }
+  
+  .MuiAlert-success {
+    border-radius: 0 !important;
+  }
+}
+
+/* Animation */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.chat-container {
+  animation: slideUp 0.3s ease-out;
+}
+
+/* Fix for proper message alignment */
+.messages-board > div {
+  width: 100%;
+}

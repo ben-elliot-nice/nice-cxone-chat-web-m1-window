@@ -53,11 +53,10 @@ export const SendMessageForm: FC<SendMessageFormProps> = ({
         className="send-message-form-text-input"
         disabled={disabled}
         inputRef={textFieldRef}
-        label="Message"
+        placeholder="Type your question ..."
         variant="outlined"
         color="primary"
         fullWidth
-        focused
         autoFocus
         InputProps={{
           endAdornment: (

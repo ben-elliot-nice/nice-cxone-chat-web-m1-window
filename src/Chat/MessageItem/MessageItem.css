@@ -1,19 +1,108 @@
-.message-item {
-  max-width: 65%;
-  padding: 10px;
+/* Message Container with timestamp below */
+.message-container {
+  display: flex;
+  flex-direction: column;
+  margin: 8px 0;
+  gap: 4px;
+  width: fit-content;
+  max-width: 75%;
 }
 
-.message-item__inbound {
+.message-container.user-message-container {
   align-self: flex-end;
+  align-items: flex-end;
+  margin-left: auto;
 }
 
-.message-item__outbound {
+.message-container.bot-message-container {
   align-self: flex-start;
+  align-items: flex-start;
+  margin-right: auto;
 }
 
-.message-item .message-item-card {
-  background-color: #e6ffe5;
+/* Custom message styling aligned with index.html design */
+.message {
+  background: white;
+  padding: 8px 12px;
+  border-radius: 18px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  font-size: 14px;
+  line-height: 1.5;
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
-.message-item__inbound .message-item-card {
-  background-color: #fff5e3;
+
+.message-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.message-author {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--m1-text-primary);
+  opacity: 0.8;
+}
+
+.message-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Bot messages (agent) - align left */
+.bot-message {
+  background: white;
+  border-radius: 0 18px 18px 18px;
+}
+
+.bot-message .message-author {
+  color: var(--m1-primary-main);
+}
+
+/* User messages (customer) - align right */
+.user-message {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  border-radius: 18px 18px 0 18px;
+}
+
+.user-message .message-author {
+  color: var(--m1-secondary-main);
+}
+
+/* System messages */
+.system-message {
+  align-self: center;
+  background: transparent;
+  box-shadow: none;
+  font-style: italic;
+  color: #666;
+  font-size: 12px;
+  text-align: center;
+  padding: 5px 10px;
+}
+
+/* Timestamp below message bubble */
+.message-timestamp {
+  font-size: 11px;
+  color: var(--m1-text-secondary);
+  opacity: 0.6;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 400;
+  margin-top: 2px;
+  padding: 0 8px;
+}
+
+/* Message text content styling */
+.message-content p {
+  margin: 0;
+  color: #333;
+  font-size: 14px;
 }
