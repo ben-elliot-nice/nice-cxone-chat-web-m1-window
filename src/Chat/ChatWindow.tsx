@@ -22,6 +22,10 @@ import { useWindowFocus } from '../hooks/focus';
 import { parseAgentName } from './Agent/agentName';
 import { mergeMessages } from '../state/messages/mergeMessages';
 import { STORAGE_CHAT_CUSTOMER_NAME } from '../constants';
+
+const STORAGE_HIDDEN_MESSAGES = 'chat-hidden-messages';
+const STORAGE_INTRO_SECTIONS_ADDED = 'chat-intro-sections-added';
+const STORAGE_INTRO_SECTIONS = 'chat-intro-sections';
 import { AgentTyping } from './Agent/AgentTyping';
 import { SystemMessage } from './SystemMessage/SystemMessage';
 import { Postback } from './MessageRichContent/MessageRichContent.tsx';
@@ -45,6 +49,27 @@ interface ChatWindowProps {
 }
 
 export const ChatWindow: FC<ChatWindowProps> = ({ sdk, thread, threadName, onThreadNameChange, onMenuAddIntroSection }) => {
+  const threadId = thread.id || 'default';
+  
+  // Load persisted state
+  const loadHiddenMessages = (): Set<string> => {
+    try {
+      const stored = localStorage.getItem(`${STORAGE_HIDDEN_MESSAGES}-${threadId}`);
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch {
+      return new Set();
+    }
+  };
+  
+  const loadIntroSectionsAdded = (): boolean => {
+    try {
+      const stored = localStorage.getItem(`${STORAGE_INTRO_SECTIONS_ADDED}-${threadId}`);
+      return stored === 'true';
+    } catch {
+      return false;
+    }
+  };
+
   const [messages, setMessages] = useState<Map<string, Message>>(new Map());
   const [customerName, setCustomerName] = useState<string>(
     localStorage.getItem(STORAGE_CHAT_CUSTOMER_NAME) ?? '',
@@ -52,10 +77,44 @@ export const ChatWindow: FC<ChatWindowProps> = ({ sdk, thread, threadName, onThr
   const windowFocus = useWindowFocus();
   const [agentName, setAgentName] = useState<string | null>(null);
   const [agentTyping, setAgentTyping] = useState<boolean | null>(null);
-  const [hiddenMessageIds, setHiddenMessageIds] = useState<Set<string>>(new Set());
+  const [hiddenMessageIds, setHiddenMessageIds] = useState<Set<string>>(loadHiddenMessages());
   const [isNewThread, setIsNewThread] = useState<boolean>(false);
-  const [hasAddedIntroSections, setHasAddedIntroSections] = useState<boolean>(false);
-  const hasAddedIntroSectionsRef = useRef<boolean>(false);
+  const [hasAddedIntroSections, setHasAddedIntroSections] = useState<boolean>(loadIntroSectionsAdded());
+  const hasAddedIntroSectionsRef = useRef<boolean>(loadIntroSectionsAdded());
+  
+  // Persistence functions
+  const saveHiddenMessages = (hiddenIds: Set<string>) => {
+    try {
+      localStorage.setItem(`${STORAGE_HIDDEN_MESSAGES}-${threadId}`, JSON.stringify(Array.from(hiddenIds)));
+    } catch (error) {
+      console.warn('Failed to save hidden messages:', error);
+    }
+  };
+  
+  const saveIntroSectionsAdded = (added: boolean) => {
+    try {
+      localStorage.setItem(`${STORAGE_INTRO_SECTIONS_ADDED}-${threadId}`, added.toString());
+    } catch (error) {
+      console.warn('Failed to save intro sections flag:', error);
+    }
+  };
+  
+  const saveIntroSections = (introSections: IntroSection[]) => {
+    try {
+      localStorage.setItem(`${STORAGE_INTRO_SECTIONS}-${threadId}`, JSON.stringify(introSections));
+    } catch (error) {
+      console.warn('Failed to save intro sections:', error);
+    }
+  };
+  
+  const loadIntroSections = (): IntroSection[] => {
+    try {
+      const stored = localStorage.getItem(`${STORAGE_INTRO_SECTIONS}-${threadId}`);
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  };
 
   // Recover thread
   useEffect(() => {
@@ -73,14 +132,37 @@ export const ChatWindow: FC<ChatWindowProps> = ({ sdk, thread, threadName, onThr
         if (recoveredMessages.length === 0) {
           console.log('New thread detected, sending initial message to trigger bot');
           setIsNewThread(true);
-          console.log('Set isNewThread to true (successful recovery path)');
+          // Reset intro sections flag and clear saved intro sections for truly new thread
+          hasAddedIntroSectionsRef.current = false;
+          setHasAddedIntroSections(false);
+          saveIntroSectionsAdded(false);
+          saveIntroSections([]); // Clear any saved intro sections
+          console.log('Set isNewThread to true and reset intro sections flag (successful recovery path)', {
+            hasAddedIntroSectionsRef: hasAddedIntroSectionsRef.current,
+            aboutToSetHasAddedIntroSections: false,
+            clearedIntroSections: true
+          });
           // Send a hidden "hi" message to trigger the bot
           await thread.sendTextMessage('hi');
           console.log('Initial hi message sent');
           // We'll mark this message as hidden when it arrives
         } else {
           console.log('Existing thread with', recoveredMessages.length, 'messages');
-          setMessages((messages) => mergeMessages(messages, recoveredMessages));
+          
+          // Load and restore intro sections if they exist
+          const savedIntroSections = loadIntroSections();
+          
+          // Merge recovered messages with intro sections in chronological order
+          const allMessages = [...recoveredMessages, ...savedIntroSections];
+          allMessages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+          
+          setMessages((messages) => {
+            const newMessages = new Map(messages);
+            allMessages.forEach(message => {
+              newMessages.set(message.id, message);
+            });
+            return newMessages;
+          });
         }
         
         setAgentName(parseAgentName(recoverResponse.inboxAssignee));
@@ -89,10 +171,20 @@ export const ChatWindow: FC<ChatWindowProps> = ({ sdk, thread, threadName, onThr
         // This is likely a new thread that doesn't exist yet
         console.log('Treating as new thread, sending initial message to trigger bot');
         setIsNewThread(true);
-        console.log('Set isNewThread to true');
+        // Reset intro sections flag and clear saved intro sections for truly new thread
+        hasAddedIntroSectionsRef.current = false;
+        setHasAddedIntroSections(false);
+        saveIntroSectionsAdded(false);
+        saveIntroSections([]); // Clear any saved intro sections
+        console.log('Set isNewThread to true and reset intro sections flag', {
+          hasAddedIntroSectionsRef: hasAddedIntroSectionsRef.current,
+          aboutToSetHasAddedIntroSections: false,
+          clearedIntroSections: true
+        });
         try {
           await thread.sendTextMessage('hi');
           console.log('Initial hi message sent for new thread');
+          // Don't load intro sections here since we just cleared them for new thread
         } catch (sendError) {
           console.error('Failed to send initial message:', sendError);
         }
@@ -144,28 +236,39 @@ export const ChatWindow: FC<ChatWindowProps> = ({ sdk, thread, threadName, onThr
     }
   }, [thread, messages, windowFocus]);
 
-  const addIntroSections = useCallback(() => {
+  const addIntroSections = useCallback((botMessageTimestamp?: string) => {
     console.log('Adding intro sections for new thread');
     
+    // Create timestamps that place intro sections immediately after the bot message
+    const baseTime = botMessageTimestamp ? new Date(botMessageTimestamp).getTime() : Date.now();
+    const timestamp1 = baseTime + 1; // 1ms after bot message
+    const timestamp2 = baseTime + 2; // 2ms after bot message
+    
     const hotTopicsSection: IntroSection = {
-      id: `intro-hot-topics-${Date.now()}`,
+      id: `intro-hot-topics-${baseTime}`,
       type: 'hotTopics',
-      createdAt: new Date().toISOString()
+      createdAt: new Date(timestamp1).toISOString()
     };
     
     const popularQuestionsSection: IntroSection = {
-      id: `intro-popular-questions-${Date.now() + 1}`,
+      id: `intro-popular-questions-${baseTime}`,
       type: 'popularQuestions', 
-      createdAt: new Date().toISOString()
+      createdAt: new Date(timestamp2).toISOString()
     };
+    
+    const introSections = [hotTopicsSection, popularQuestionsSection];
     
     setMessages((prevMessages) => {
       const newMessages = new Map(prevMessages);
-      newMessages.set(hotTopicsSection.id, hotTopicsSection);
-      newMessages.set(popularQuestionsSection.id, popularQuestionsSection);
+      introSections.forEach(section => {
+        newMessages.set(section.id, section);
+      });
       return newMessages;
     });
-  }, []);
+    
+    // Save intro sections to localStorage
+    saveIntroSections(introSections);
+  }, [threadId]);
 
   const addSingleIntroSection = useCallback((type: 'hotTopics' | 'popularQuestions') => {
     console.log('Adding single intro section from menu:', type);
@@ -181,7 +284,11 @@ export const ChatWindow: FC<ChatWindowProps> = ({ sdk, thread, threadName, onThr
       newMessages.set(introSection.id, introSection);
       return newMessages;
     });
-  }, []);
+    
+    // Update saved intro sections by adding this new one
+    const existingSections = loadIntroSections();
+    saveIntroSections([...existingSections, introSection]);
+  }, [threadId]);
 
   // Expose the addSingleIntroSection function to parent
   useEffect(() => {
@@ -204,7 +311,12 @@ export const ChatWindow: FC<ChatWindowProps> = ({ sdk, thread, threadName, onThr
           message.messageContent.payload.text.toLowerCase() === 'hi') {
         console.log('Hiding initial hi message:', message.id);
         // Add this message ID to hidden list
-        setHiddenMessageIds((prev) => new Set(prev).add(message.id));
+        setHiddenMessageIds((prev) => {
+          const newHidden = new Set(prev).add(message.id);
+          saveHiddenMessages(newHidden);
+          return newHidden;
+        });
+        // DO NOT add intro sections here - wait for bot response
       }
 
       setMessages(
@@ -212,36 +324,33 @@ export const ChatWindow: FC<ChatWindowProps> = ({ sdk, thread, threadName, onThr
           new Map<string, Message>(messages.set(message.id, message)),
       );
       
-      // Check if this is a bot response to add intro sections
-      // Alternative approach: check if this is the first visible bot message
-      const isFirstBotMessage = !hasAddedIntroSectionsRef.current && 
-                                message.direction === 'outbound' && 
-                                !hiddenMessageIds.has(message.id) &&
-                                messages.size <= 1; // Only hidden "hi" message exists
-      
-      console.log('Checking for intro sections:', {
-        isNewThread,
-        hasAddedIntroSections, 
-        hasAddedIntroSectionsRef: hasAddedIntroSectionsRef.current,
+      console.log('Message check:', {
         direction: message.direction,
+        messageText: message.messageContent.payload.text.substring(0, 50),
+        timestamp: message.createdAt,
+        hasAddedIntroSectionsRef: hasAddedIntroSectionsRef.current,
         hidden: hiddenMessageIds.has(message.id),
-        messageText: message.messageContent.payload.text,
-        messagesSize: messages.size,
-        isFirstBotMessage
+        isHiMessage: message.messageContent.payload.text.toLowerCase() === 'hi'
       });
       
-      if (isFirstBotMessage) {
+      // Simpler approach: only check if this is the first outbound message that's not hidden
+      // and we haven't added intro sections yet
+      if (!hasAddedIntroSectionsRef.current && 
+          message.direction === 'outbound' && 
+          !hiddenMessageIds.has(message.id)) {
         console.log('First bot response received, adding intro sections');
         // Set the ref immediately to prevent duplicate additions
+        console.log('Setting intro flags to true for bot message');
         hasAddedIntroSectionsRef.current = true;
         setHasAddedIntroSections(true);
+        saveIntroSectionsAdded(true);
         // Add intro sections after a short delay to ensure proper ordering
         setTimeout(() => {
-          addIntroSections();
+          addIntroSections(message.createdAt);
         }, 100);
       }
     },
-    [messages.size, isNewThread, hiddenMessageIds, addIntroSections],
+    [isNewThread, hiddenMessageIds, addIntroSections],
   );
 
   const handleAssignedAgentChangeEvent = useCallback(

@@ -92,6 +92,13 @@ export const MessagesBoard: FC<MessagesBoardProps> = ({
     }
   }, [onQuickReply]);
 
+  const handleQuickRepliesDetected = useCallback((shouldShow: boolean) => {
+    if (shouldShow) {
+      // A new message with QRs was detected - reset the global hide flag
+      setShouldHideQuickReplies(false);
+    }
+  }, []);
+
   // Wait for messages to stabilize after initial load before tracking changes
   useMemo(() => {
     const currentCount = messageArray.length;
@@ -112,9 +119,9 @@ export const MessagesBoard: FC<MessagesBoardProps> = ({
       const latestMessage = messageArray[currentCount - 1];
       if (isMessage(latestMessage) && latestMessage.direction === 'inbound') {
         setShouldHideQuickReplies(true);
-      } else {
-        setShouldHideQuickReplies(false);
       }
+      // Don't set shouldHideQuickReplies to false for bot messages
+      // Let Quick Replies only show when explicitly detected in MessageText component
     }
     setPreviousMessageCount(currentCount);
   }, [messageArray, previousMessageCount, isStableAfterLoad, shouldHideQuickReplies]);
@@ -133,6 +140,7 @@ export const MessagesBoard: FC<MessagesBoardProps> = ({
                 onAction={onPostback}
                 onQuickReply={handleQuickReply}
                 shouldHideQuickReplies={shouldHideQuickReplies}
+                onQuickRepliesDetected={handleQuickRepliesDetected}
               />
             );
           } else if (isIntroSection(item)) {
