@@ -31,9 +31,11 @@ type Message = ContentMessage | SystemMessage;
 interface ChatWindowProps {
   sdk: ChatSdk;
   thread: Thread | LivechatThread;
+  threadName?: string;
+  onThreadNameChange?: (name: string) => void;
 }
 
-export const ChatWindow: FC<ChatWindowProps> = ({ sdk, thread }) => {
+export const ChatWindow: FC<ChatWindowProps> = ({ sdk, thread, threadName, onThreadNameChange }) => {
   const [messages, setMessages] = useState<Map<string, Message>>(new Map());
   const [customerName, setCustomerName] = useState<string>(
     localStorage.getItem(STORAGE_CHAT_CUSTOMER_NAME) ?? '',
@@ -234,20 +236,27 @@ export const ChatWindow: FC<ChatWindowProps> = ({ sdk, thread }) => {
   );
 
   return (
-    <>
-      <Customer name={customerName} onChange={handleInputCustomerNameChanged} />
-      <MessagesBoard
-        messages={messages}
-        loadMoreMessages={handleLoadMoreMessages}
-        onPostback={handlePostback}
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <Customer 
+        name={customerName} 
+        onChange={handleInputCustomerNameChanged}
+        threadName={threadName}
+        onThreadNameChange={onThreadNameChange}
       />
-      {agentTyping ? <AgentTyping /> : null}
+      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <MessagesBoard
+          messages={messages}
+          loadMoreMessages={handleLoadMoreMessages}
+          onPostback={handlePostback}
+        />
+        {agentTyping ? <AgentTyping /> : null}
+      </div>
       <SendMessageForm
         onSubmit={handleSendMessage}
         onFileUpload={handleFileUpload}
         onKeyUp={handleMessageKeyUp}
         disabled={false}
       />
-    </>
+    </div>
   );
 };

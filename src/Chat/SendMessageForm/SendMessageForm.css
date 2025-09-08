@@ -1,8 +1,13 @@
 .send-message-form {
   display: flex;
-  padding-top: 12px;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: white;
+  border-top: 1px solid #e0e0e0;
+  flex-shrink: 0;
 }
 
 .send-message-form-text-input {
-  padding: 6px;
+  flex: 1;
 }

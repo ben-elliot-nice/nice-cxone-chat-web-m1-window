@@ -12,8 +12,8 @@
     position: fixed;
     bottom: 20px;
     right: 20px;
-    width: 30vw;
-    height: 60vh;
+    width: 31.5vw;
+    height: 66vh;
     min-width: 350px;
     min-height: 400px;
     background: white;
@@ -111,7 +111,6 @@
     padding: 10px 15px;
     border-radius: 18px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-    max-width: 85%;
     font-size: 14px;
     line-height: 1.5;
     word-wrap: break-word;
@@ -189,6 +188,16 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+}
+
+.chat-widget .messages-board {
+    background: #f3f3f8 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    overflow-y: auto !important;
+    min-height: 0 !important;
+    padding: 15px !important;
 }
 
 /* Message Item Override */
@@ -427,6 +436,7 @@
     height: 100% !important;
     padding: 0 !important;
     flex: 1 !important;
+    overflow: hidden !important;
 }
 
 .chat-widget .chat-window {
@@ -436,6 +446,14 @@
     height: 100% !important;
     padding: 0 !important;
     background: transparent !important;
+    overflow: hidden !important;
+}
+
+/* Ensure the main chat widget has proper flex structure */
+.chat-widget {
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
 }
 
 /* Override send message form styles */
@@ -444,15 +462,12 @@
     background: white !important;
     border-top: 1px solid #e0e0e0 !important;
     display: flex !important;
-    gap: 10px !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-shrink: 0 !important;
 }
 
 .chat-widget .send-message-form-text-input {
-    padding: 0 !important;
-    flex: 1 !important;
-}
-
-.chat-widget .send-message-form .MuiTextField-root {
     flex: 1 !important;
 }
 
@@ -460,13 +475,11 @@
     background: white !important;
     border-radius: 20px !important;
     font-size: 14px !important;
-    padding: 0 !important;
 }
 
-.chat-widget .send-message-form .MuiOutlinedInput-input {
-    padding: 10px 14px !important;
-    font-size: 14px !important;
-    color: #333 !important;
+.chat-widget .send-message-form .MuiIconButton-root {
+    color: #ff9e1b !important;
+    padding: 8px !important;
 }
 
 .chat-widget .send-message-form .MuiOutlinedInput-notchedOutline {

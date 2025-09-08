@@ -28,11 +28,6 @@ export const MessageItem: FC<MessageItemProps> = ({ message, onAction }) => {
         data-testid="message-item"
         data-id={message.id}
       >
-        {!isCustomer && (
-          <div className="message-header">
-            <span className="message-author">{author}</span>
-          </div>
-        )}
         <div className="message-content">
           <MessageAttachments attachments={message.attachments} />
           <MessageText text={message.messageContent.payload.text} />

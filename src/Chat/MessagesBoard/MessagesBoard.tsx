@@ -24,7 +24,8 @@ export const MessagesBoard: FC<MessagesBoardProps> = ({
 
   return (
     <div className="messages-board">
-      <LoadMoreMessagesTrigger onTrigger={loadMoreMessages} />
+      {/* Hidden for now - uncomment to show load more messages button */}
+      {/* <LoadMoreMessagesTrigger onTrigger={loadMoreMessages} /> */}
       {messageArray
         .map((message) =>
           isMessage(message) ? (

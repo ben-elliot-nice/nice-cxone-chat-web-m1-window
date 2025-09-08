@@ -19,7 +19,7 @@ export const SendMessageForm: FC<SendMessageFormProps> = ({
   onKeyUp,
   onSubmit,
 }) => {
-  const textFieldRef = useRef<HTMLInputElement>(null);
+  const textFieldRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSubmit = useCallback(() => {
     if (disabled) {
@@ -34,20 +34,33 @@ export const SendMessageForm: FC<SendMessageFormProps> = ({
     if (textFieldRef.current) {
       textFieldRef.current.value = '';
     }
-  }, [disabled]);
+  }, [disabled, onSubmit]);
 
   const handleKeyUp = useCallback(
-    (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === 'Enter') {
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      // Submit on Enter without Shift key
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
         handleSubmit();
+        return;
       }
-      return onKeyUp(event);
+      return onKeyUp(event as any);
     },
     [handleSubmit, onKeyUp],
   );
 
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      // Prevent default Enter behavior when not holding Shift
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+      }
+    },
+    [],
+  );
+
   return (
-    <div className="send-message-form">
+    <div className="send-message-form" style={{ flexShrink: 0 }}>
       <TextField
         data-testid="send-message-form-text-input"
         className="send-message-form-text-input"
@@ -57,15 +70,30 @@ export const SendMessageForm: FC<SendMessageFormProps> = ({
         variant="outlined"
         color="primary"
         fullWidth
-        autoFocus
+        multiline
+        maxRows={3}
         InputProps={{
-          endAdornment: (
-            <FileUpload onFileUpload={onFileUpload} disabled={disabled} />
-          ),
           onKeyUp: handleKeyUp,
+          onKeyDown: handleKeyDown,
+          sx: {
+            padding: '8px 12px !important',
+            '& textarea': {
+              resize: 'none',
+              overflow: 'hidden',
+              padding: '0 !important',
+              lineHeight: '1.4',
+              fontSize: '14px',
+              minHeight: '20px !important',
+              height: '20px !important',
+            },
+          },
         }}
       />
-      <IconButton onClick={handleSubmit}>
+      <FileUpload onFileUpload={onFileUpload} disabled={disabled} />
+      <IconButton 
+        onClick={handleSubmit}
+        sx={{ padding: '8px' }}
+      >
         <SendIcon color="primary" />
       </IconButton>
     </div>
