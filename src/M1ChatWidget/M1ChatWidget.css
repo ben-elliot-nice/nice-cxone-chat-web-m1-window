@@ -12,8 +12,8 @@
     position: fixed;
     bottom: 20px;
     right: 20px;
-    width: 31.5vw;
-    height: 66vh;
+    width: 33.075vw;
+    height: 72.6vh;
     min-width: 350px;
     min-height: 400px;
     background: white;
@@ -196,6 +196,7 @@
     flex-direction: column !important;
     flex: 1 !important;
     overflow-y: auto !important;
+    overflow-x: hidden !important;
     min-height: 0 !important;
     padding: 15px !important;
 }

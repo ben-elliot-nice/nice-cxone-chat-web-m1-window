@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import React, { FC, useCallback, useEffect, useRef, useState, useMemo } from 'react';
 
 import {
   AssignedAgentChangedData,
@@ -43,6 +43,7 @@ export const ChatWindow: FC<ChatWindowProps> = ({ sdk, thread, threadName, onThr
   const windowFocus = useWindowFocus();
   const [agentName, setAgentName] = useState<string | null>(null);
   const [agentTyping, setAgentTyping] = useState<boolean | null>(null);
+  const [hiddenMessageIds, setHiddenMessageIds] = useState<Set<string>>(new Set());
 
   // Recover thread
   useEffect(() => {
@@ -55,10 +56,30 @@ export const ChatWindow: FC<ChatWindowProps> = ({ sdk, thread, threadName, onThr
         const recoverResponse = await thread.recover();
         const recoveredMessages =
           recoverResponse.messages.reverse() as Message[];
-        setMessages((messages) => mergeMessages(messages, recoveredMessages));
+        
+        // Check if this is a brand new thread (no messages)
+        if (recoveredMessages.length === 0) {
+          console.log('New thread detected, sending initial message to trigger bot');
+          // Send a hidden "hi" message to trigger the bot
+          await thread.sendTextMessage('hi');
+          console.log('Initial hi message sent');
+          // We'll mark this message as hidden when it arrives
+        } else {
+          console.log('Existing thread with', recoveredMessages.length, 'messages');
+          setMessages((messages) => mergeMessages(messages, recoveredMessages));
+        }
+        
         setAgentName(parseAgentName(recoverResponse.inboxAssignee));
       } catch (error) {
-        console.error(error);
+        console.log('Thread recovery failed (likely new thread):', error.message);
+        // This is likely a new thread that doesn't exist yet
+        console.log('Treating as new thread, sending initial message to trigger bot');
+        try {
+          await thread.sendTextMessage('hi');
+          console.log('Initial hi message sent for new thread');
+        } catch (sendError) {
+          console.error('Failed to send initial message:', sendError);
+        }
       }
     };
 
@@ -115,12 +136,28 @@ export const ChatWindow: FC<ChatWindowProps> = ({ sdk, thread, threadName, onThr
       }
       const message = event.detail.data.message;
 
+      // Check if this is the first "hi" message we sent to trigger the bot
+      console.log('Message received:', {
+        messageCount: messages.size,
+        direction: message.direction,
+        text: message.messageContent.payload.text,
+        messageId: message.id
+      });
+      
+      if (messages.size === 0 && 
+          message.direction === 'inbound' && 
+          message.messageContent.payload.text.toLowerCase() === 'hi') {
+        console.log('Hiding initial hi message:', message.id);
+        // Add this message ID to hidden list
+        setHiddenMessageIds((prev) => new Set(prev).add(message.id));
+      }
+
       setMessages(
         (messages) =>
           new Map<string, Message>(messages.set(message.id, message)),
       );
     },
-    [],
+    [messages.size],
   );
 
   const handleAssignedAgentChangeEvent = useCallback(
@@ -242,6 +279,21 @@ export const ChatWindow: FC<ChatWindowProps> = ({ sdk, thread, threadName, onThr
     [thread],
   );
 
+  // Filter out hidden messages before passing to MessagesBoard
+  const visibleMessages = useMemo(() => {
+    const filtered = new Map<string, Message>();
+    console.log('Filtering messages. Hidden IDs:', Array.from(hiddenMessageIds));
+    messages.forEach((message, id) => {
+      if (!hiddenMessageIds.has(id)) {
+        filtered.set(id, message);
+      } else {
+        console.log('Hiding message:', id, message.messageContent.payload.text);
+      }
+    });
+    console.log('Visible messages:', filtered.size, 'out of', messages.size);
+    return filtered;
+  }, [messages, hiddenMessageIds]);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <Customer 
@@ -252,7 +304,7 @@ export const ChatWindow: FC<ChatWindowProps> = ({ sdk, thread, threadName, onThr
       />
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         <MessagesBoard
-          messages={messages}
+          messages={visibleMessages}
           loadMoreMessages={handleLoadMoreMessages}
           onPostback={handlePostback}
           onQuickReply={handleQuickReply}
