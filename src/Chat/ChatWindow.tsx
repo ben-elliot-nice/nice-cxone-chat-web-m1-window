@@ -235,6 +235,13 @@ export const ChatWindow: FC<ChatWindowProps> = ({ sdk, thread, threadName, onThr
     [thread],
   );
 
+  const handleQuickReply = useCallback(
+    (option: string) => {
+      thread.sendTextMessage(option);
+    },
+    [thread],
+  );
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <Customer 
@@ -248,6 +255,7 @@ export const ChatWindow: FC<ChatWindowProps> = ({ sdk, thread, threadName, onThr
           messages={messages}
           loadMoreMessages={handleLoadMoreMessages}
           onPostback={handlePostback}
+          onQuickReply={handleQuickReply}
         />
         {agentTyping ? <AgentTyping /> : null}
       </div>
