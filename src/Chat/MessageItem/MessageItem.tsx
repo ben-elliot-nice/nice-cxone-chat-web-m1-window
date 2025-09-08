@@ -14,6 +14,7 @@ interface MessageItemProps {
   onAction: (postback: Postback) => void;
   shouldHideQuickReplies?: boolean;
   onQuickReply?: (option: string) => void;
+  onQuickRepliesDetected?: (shouldShow: boolean) => void;
 }
 
 const OPTIONS = [
@@ -24,7 +25,7 @@ const OPTIONS = [
   "Roaming Troubleshooting"
 ];
 
-export const MessageItem: FC<MessageItemProps> = ({ message, onAction, shouldHideQuickReplies, onQuickReply }) => {
+export const MessageItem: FC<MessageItemProps> = ({ message, onAction, shouldHideQuickReplies, onQuickReply, onQuickRepliesDetected }) => {
   const isCustomer = message.direction === 'inbound';
   const author = getAuthor(message);
   const timestamp = new Date(message.createdAt).toLocaleTimeString([], { 
@@ -36,7 +37,11 @@ export const MessageItem: FC<MessageItemProps> = ({ message, onAction, shouldHid
 
   const handleQuickRepliesDetected = useCallback((shouldShow: boolean) => {
     setShowQuickReplies(shouldShow);
-  }, []);
+    // Also notify the parent MessagesBoard so it can reset global hide state
+    if (onQuickRepliesDetected) {
+      onQuickRepliesDetected(shouldShow);
+    }
+  }, [onQuickRepliesDetected]);
 
   const handleQuickReply = useCallback((option: string) => {
     setShowQuickReplies(false);
