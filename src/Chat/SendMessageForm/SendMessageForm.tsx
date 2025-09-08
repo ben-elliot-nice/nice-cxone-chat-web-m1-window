@@ -32,6 +32,7 @@ export const SendMessageForm: FC<SendMessageFormProps> = ({
   onSubmit,
 }) => {
   const textFieldRef = useRef<HTMLTextAreaElement>(null);
+  const formRef = useRef<HTMLDivElement>(null);
   const [inputValue, setInputValue] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
 
@@ -53,7 +54,7 @@ export const SendMessageForm: FC<SendMessageFormProps> = ({
         match: phrase.substring(matchIndex, matchIndex + inputValue.trim().length),
         afterMatch: phrase.substring(matchIndex + inputValue.trim().length)
       };
-    }).filter(Boolean);
+    }).filter(Boolean).slice(0, 4);
   }, [inputValue]);
 
   const handleSubmit = useCallback((customText?: string) => {
@@ -114,7 +115,7 @@ export const SendMessageForm: FC<SendMessageFormProps> = ({
 
   return (
     <ClickAwayListener onClickAway={() => setShowSuggestions(false)}>
-      <div className="send-message-form" style={{ flexShrink: 0, position: 'relative' }}>
+      <div ref={formRef} className="send-message-form" style={{ flexShrink: 0, position: 'relative' }}>
         <TextField
           data-testid="send-message-form-text-input"
           className="send-message-form-text-input"
@@ -148,17 +149,25 @@ export const SendMessageForm: FC<SendMessageFormProps> = ({
         {/* Suggestions Popover */}
         <Popper
           open={showSuggestions && suggestions.length > 0}
-          anchorEl={textFieldRef.current?.parentElement}
+          anchorEl={formRef.current}
           placement="top-start"
           style={{ zIndex: 1300 }}
+          modifiers={[
+            {
+              name: 'offset',
+              options: {
+                offset: [0, 0],
+              },
+            },
+          ]}
         >
           <Paper
-            elevation={8}
+            elevation={0}
             sx={{
-              maxWidth: '400px',
-              minWidth: '300px',
-              marginBottom: '8px',
-              border: '1px solid #e0e0e0'
+              width: `${(formRef.current?.offsetWidth || 300) - 15}px`,
+              border: '1px solid #e0e0e0',
+              borderRadius: '0',
+              boxShadow: '0 -2px 8px rgba(0, 0, 0, 0.15)'
             }}
           >
             {suggestions.map((suggestion, index) => (
