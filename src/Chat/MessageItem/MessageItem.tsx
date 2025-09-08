@@ -14,7 +14,7 @@ interface MessageItemProps {
   onAction: (postback: Postback) => void;
   shouldHideQuickReplies?: boolean;
   onQuickReply?: (option: string) => void;
-  onQuickRepliesDetected?: (shouldShow: boolean) => void;
+  onQuickRepliesDetected?: (shouldShow: boolean, messageId?: string) => void;
 }
 
 const OPTIONS = [
@@ -39,9 +39,9 @@ export const MessageItem: FC<MessageItemProps> = ({ message, onAction, shouldHid
     setShowQuickReplies(shouldShow);
     // Also notify the parent MessagesBoard so it can reset global hide state
     if (onQuickRepliesDetected) {
-      onQuickRepliesDetected(shouldShow);
+      onQuickRepliesDetected(shouldShow, message.id);
     }
-  }, [onQuickRepliesDetected]);
+  }, [onQuickRepliesDetected, message.id]);
 
   const handleQuickReply = useCallback((option: string) => {
     setShowQuickReplies(false);

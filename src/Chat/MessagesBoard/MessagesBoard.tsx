@@ -9,6 +9,8 @@ import { Card } from '@mui/material';
 import './MessagesBoard.css';
 import { Postback } from '../MessageRichContent/MessageRichContent.tsx';
 
+const STORAGE_PROCESSED_QR_MESSAGES = 'chat-processed-qr-messages';
+
 type IntroSection = {
   id: string;
   type: 'hotTopics' | 'popularQuestions';
@@ -32,10 +34,33 @@ export const MessagesBoard: FC<MessagesBoardProps> = ({
   onTopicClick,
   onQuestionClick,
 }) => {
-  const [shouldHideQuickReplies, setShouldHideQuickReplies] = useState(false);
+  const [shouldHideQuickReplies, setShouldHideQuickReplies] = useState(true);
   const [previousMessageCount, setPreviousMessageCount] = useState(0);
   const [isStableAfterLoad, setIsStableAfterLoad] = useState(false);
+  const [latestQRMessageId, setLatestQRMessageId] = useState<string | null>(null);
+  const processedMessagesRef = useRef<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Load processed messages from localStorage on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_PROCESSED_QR_MESSAGES);
+      if (stored) {
+        processedMessagesRef.current = new Set(JSON.parse(stored));
+        console.log('Loaded processed QR messages:', Array.from(processedMessagesRef.current));
+      }
+    } catch (e) {
+      console.warn('Failed to load processed QR messages:', e);
+    }
+  }, []);
+
+  const saveProcessedMessages = useCallback(() => {
+    try {
+      localStorage.setItem(STORAGE_PROCESSED_QR_MESSAGES, JSON.stringify(Array.from(processedMessagesRef.current)));
+    } catch (e) {
+      console.warn('Failed to save processed QR messages:', e);
+    }
+  }, []);
   
   const isIntroSection = (item: any): item is IntroSection => {
     return item && typeof item === 'object' && 'type' in item && (item.type === 'hotTopics' || item.type === 'popularQuestions');
@@ -92,12 +117,20 @@ export const MessagesBoard: FC<MessagesBoardProps> = ({
     }
   }, [onQuickReply]);
 
-  const handleQuickRepliesDetected = useCallback((shouldShow: boolean) => {
-    if (shouldShow) {
-      // A new message with QRs was detected - reset the global hide flag
-      setShouldHideQuickReplies(false);
+  const handleQuickRepliesDetected = useCallback((shouldShow: boolean, messageId?: string) => {
+    if (shouldShow && messageId) {
+      // Only process if this message hasn't been processed before (truly new)
+      if (!processedMessagesRef.current.has(messageId)) {
+        console.log('New QR message detected:', messageId);
+        processedMessagesRef.current.add(messageId);
+        setLatestQRMessageId(messageId);
+        setShouldHideQuickReplies(false);
+        saveProcessedMessages();
+      } else {
+        console.log('Ignoring already processed QR message:', messageId);
+      }
     }
-  }, []);
+  }, [saveProcessedMessages]);
 
   // Wait for messages to stabilize after initial load before tracking changes
   useMemo(() => {
@@ -139,7 +172,7 @@ export const MessagesBoard: FC<MessagesBoardProps> = ({
                 key={item.id}
                 onAction={onPostback}
                 onQuickReply={handleQuickReply}
-                shouldHideQuickReplies={shouldHideQuickReplies}
+                shouldHideQuickReplies={shouldHideQuickReplies || (latestQRMessageId !== null && latestQRMessageId !== item.id)}
                 onQuickRepliesDetected={handleQuickRepliesDetected}
               />
             );
