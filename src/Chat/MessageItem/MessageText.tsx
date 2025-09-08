@@ -10,5 +10,15 @@ export const MessageText: FC<MessageTextProps> = ({ text }) => {
     return null;
   }
 
-  return <Typography variant="body1">{text}</Typography>;
+  return (
+    <Typography 
+      variant="body1" 
+      sx={{ 
+        whiteSpace: 'pre-wrap',
+        wordWrap: 'break-word' 
+      }}
+    >
+      {text}
+    </Typography>
+  );
 };
