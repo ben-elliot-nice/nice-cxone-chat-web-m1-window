@@ -3,14 +3,25 @@ import { FC, useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { MessageItem } from '../MessageItem/MessageItem';
 import { LoadMoreMessagesTrigger } from './LoadMoreMessagesTrigger/LoadMoreMessagesTrigger';
 import { SystemMessage } from '../SystemMessage/SystemMessage';
+import { HotTopics } from '../HotTopics/HotTopics';
+import { PopularQuestions } from '../PopularQuestions/PopularQuestions';
+import { Card } from '@mui/material';
 import './MessagesBoard.css';
 import { Postback } from '../MessageRichContent/MessageRichContent.tsx';
 
+type IntroSection = {
+  id: string;
+  type: 'hotTopics' | 'popularQuestions';
+  createdAt: string;
+};
+
 interface MessagesBoardProps {
-  messages: Map<string, Message | SystemMessage>;
+  messages: Map<string, Message | SystemMessage | IntroSection>;
   loadMoreMessages: () => void;
   onPostback: (postback: Postback) => void;
   onQuickReply?: (option: string) => void;
+  onTopicClick?: (topic: string) => void;
+  onQuestionClick?: (question: string) => void;
 }
 
 export const MessagesBoard: FC<MessagesBoardProps> = ({
@@ -18,11 +29,17 @@ export const MessagesBoard: FC<MessagesBoardProps> = ({
   loadMoreMessages,
   onPostback,
   onQuickReply,
+  onTopicClick,
+  onQuestionClick,
 }) => {
   const [shouldHideQuickReplies, setShouldHideQuickReplies] = useState(false);
   const [previousMessageCount, setPreviousMessageCount] = useState(0);
   const [isStableAfterLoad, setIsStableAfterLoad] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  const isIntroSection = (item: any): item is IntroSection => {
+    return item && typeof item === 'object' && 'type' in item && (item.type === 'hotTopics' || item.type === 'popularQuestions');
+  };
   
   const messageArray = useMemo(
     () => Array.from(messages.values()),
@@ -107,19 +124,50 @@ export const MessagesBoard: FC<MessagesBoardProps> = ({
       {/* Hidden for now - uncomment to show load more messages button */}
       {/* <LoadMoreMessagesTrigger onTrigger={loadMoreMessages} /> */}
       {messageArray
-        .map((message) =>
-          isMessage(message) ? (
-            <MessageItem
-              message={message}
-              key={message.id}
-              onAction={onPostback}
-              onQuickReply={handleQuickReply}
-              shouldHideQuickReplies={shouldHideQuickReplies}
-            />
-          ) : (
-            <SystemMessage message={message} key={message.id} />
-          ),
-        )
+        .map((item) => {
+          if (isMessage(item)) {
+            return (
+              <MessageItem
+                message={item}
+                key={item.id}
+                onAction={onPostback}
+                onQuickReply={handleQuickReply}
+                shouldHideQuickReplies={shouldHideQuickReplies}
+              />
+            );
+          } else if (isIntroSection(item)) {
+            return (
+              <Card 
+                key={item.id}
+                className="message-item message-item__outbound"
+                sx={{
+                  padding: '8px 12px !important',
+                  borderRadius: '0 18px 18px 18px !important',
+                  boxShadow: '0 1px 4px rgba(0, 0, 0, 0.1) !important',
+                  background: 'white !important',
+                  margin: '5px 0 !important',
+                  maxWidth: '85%',
+                  alignSelf: 'flex-start',
+                  overflow: 'visible !important',
+                  '& .MuiCardContent-root': {
+                    padding: '0 !important',
+                    '&:last-child': {
+                      paddingBottom: '0 !important'
+                    }
+                  }
+                }}
+              >
+                {item.type === 'hotTopics' && onTopicClick ? (
+                  <HotTopics onTopicClick={onTopicClick} />
+                ) : item.type === 'popularQuestions' && onQuestionClick ? (
+                  <PopularQuestions onQuestionClick={onQuestionClick} />
+                ) : null}
+              </Card>
+            );
+          } else {
+            return <SystemMessage message={item} key={item.id} />;
+          }
+        })
         .filter(Boolean)}
       {/* Invisible element at the bottom for scrolling */}
       <div ref={messagesEndRef} />
