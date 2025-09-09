@@ -77,10 +77,17 @@ export const ChatWindow: FC<ChatWindowProps> = ({ sdk, thread, threadName, onThr
   const windowFocus = useWindowFocus();
   const [agentName, setAgentName] = useState<string | null>(null);
   const [agentTyping, setAgentTyping] = useState<boolean | null>(null);
+  const [showCustomTyping, setShowCustomTyping] = useState<boolean>(false);
   const [hiddenMessageIds, setHiddenMessageIds] = useState<Set<string>>(loadHiddenMessages());
   const [isNewThread, setIsNewThread] = useState<boolean>(false);
   const [hasAddedIntroSections, setHasAddedIntroSections] = useState<boolean>(loadIntroSectionsAdded());
   const hasAddedIntroSectionsRef = useRef<boolean>(loadIntroSectionsAdded());
+  
+  // Helper function to check if a message contains QR-triggering text
+  const hasQuickReplyText = (message: ContentMessage): boolean => {
+    const text = message.messageContent?.payload?.text || '';
+    return text.toLowerCase().includes('please select from one of the following options');
+  };
   
   // Persistence functions
   const saveHiddenMessages = (hiddenIds: Set<string>) => {
@@ -305,6 +312,18 @@ export const ChatWindow: FC<ChatWindowProps> = ({ sdk, thread, threadName, onThr
       }
       const message = event.detail.data.message;
 
+      // Handle typing indicator logic
+      if (message.direction === 'outbound') {
+        // Hide custom typing indicator when bot responds
+        setShowCustomTyping(false);
+      } else if (message.direction === 'inbound') {
+        // Show typing indicator for user messages (except initial "hi")
+        const isInitialHi = messages.size === 0 && message.messageContent.payload.text.toLowerCase() === 'hi';
+        if (!isInitialHi) {
+          setShowCustomTyping(true);
+        }
+      }
+
       // Check if this is the first "hi" message we sent to trigger the bot
       if (messages.size === 0 && 
           message.direction === 'inbound' && 
@@ -414,6 +433,7 @@ export const ChatWindow: FC<ChatWindowProps> = ({ sdk, thread, threadName, onThr
 
   const handleSendMessage = useCallback(
     (messageText: string) => {
+      // Don't show typing indicator immediately - wait for message to appear
       thread.sendTextMessage(messageText);
     },
     [thread],
@@ -513,8 +533,8 @@ export const ChatWindow: FC<ChatWindowProps> = ({ sdk, thread, threadName, onThr
           onQuickReply={handleQuickReply}
           onTopicClick={handleTopicClick}
           onQuestionClick={handleQuestionClick}
+          showTypingIndicator={showCustomTyping || agentTyping}
         />
-        {agentTyping ? <AgentTyping /> : null}
       </div>
       <SendMessageForm
         onSubmit={handleSendMessage}

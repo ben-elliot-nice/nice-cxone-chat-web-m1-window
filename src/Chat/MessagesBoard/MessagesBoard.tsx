@@ -5,6 +5,7 @@ import { LoadMoreMessagesTrigger } from './LoadMoreMessagesTrigger/LoadMoreMessa
 import { SystemMessage } from '../SystemMessage/SystemMessage';
 import { HotTopics } from '../HotTopics/HotTopics';
 import { PopularQuestions } from '../PopularQuestions/PopularQuestions';
+import { AgentTyping } from '../Agent/AgentTyping';
 import { Card } from '@mui/material';
 import './MessagesBoard.css';
 import { Postback } from '../MessageRichContent/MessageRichContent.tsx';
@@ -24,6 +25,7 @@ interface MessagesBoardProps {
   onQuickReply?: (option: string) => void;
   onTopicClick?: (topic: string) => void;
   onQuestionClick?: (question: string) => void;
+  showTypingIndicator?: boolean;
 }
 
 export const MessagesBoard: FC<MessagesBoardProps> = ({
@@ -33,6 +35,7 @@ export const MessagesBoard: FC<MessagesBoardProps> = ({
   onQuickReply,
   onTopicClick,
   onQuestionClick,
+  showTypingIndicator,
 }) => {
   const [shouldHideQuickReplies, setShouldHideQuickReplies] = useState(true);
   const [previousMessageCount, setPreviousMessageCount] = useState(0);
@@ -53,6 +56,30 @@ export const MessagesBoard: FC<MessagesBoardProps> = ({
       console.warn('Failed to load processed QR messages:', e);
     }
   }, []);
+
+  // Check if most recent message should show QRs on initial load
+  useEffect(() => {
+    const messageArray = Array.from(messages.values());
+    if (messageArray.length > 0) {
+      // Find the most recent actual message (not intro section)
+      const actualMessages = messageArray.filter(msg => isMessage(msg)).sort((a, b) => 
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+      
+      if (actualMessages.length > 0) {
+        const mostRecentMessage = actualMessages[actualMessages.length - 1];
+        
+        // If the most recent message is outbound and contains QR text, allow it to show QRs
+        if (mostRecentMessage.direction === 'outbound' && 
+            mostRecentMessage.messageContent?.payload?.text?.toLowerCase()?.includes('please select from one of the following options')) {
+          
+          console.log('Most recent message on thread load has QRs:', mostRecentMessage.id);
+          setLatestQRMessageId(mostRecentMessage.id);
+          setShouldHideQuickReplies(false);
+        }
+      }
+    }
+  }, [messages.size]); // Run when messages are first loaded
 
   const saveProcessedMessages = useCallback(() => {
     try {
@@ -210,6 +237,8 @@ export const MessagesBoard: FC<MessagesBoardProps> = ({
           }
         })
         .filter(Boolean)}
+      {/* Typing indicator */}
+      {showTypingIndicator && <AgentTyping />}
       {/* Invisible element at the bottom for scrolling */}
       <div ref={messagesEndRef} />
     </div>
