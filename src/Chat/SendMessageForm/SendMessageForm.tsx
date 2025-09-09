@@ -22,7 +22,8 @@ const SUGGESTION_PHRASES = [
   "Can you book a flight ticket for me?",
   "What types of roaming do you offer?",
   "How do I activate the daily passport?",
-  "What are the charges per day?"
+  "What are the charges per day?",
+  "Why is there no network on my device?"
 ];
 
 export const SendMessageForm: FC<SendMessageFormProps> = ({

@@ -69,9 +69,16 @@ export const MessagesBoard: FC<MessagesBoardProps> = ({
       if (actualMessages.length > 0) {
         const mostRecentMessage = actualMessages[actualMessages.length - 1];
         
-        // If the most recent message is outbound and contains QR text, allow it to show QRs
-        if (mostRecentMessage.direction === 'outbound' && 
-            mostRecentMessage.messageContent?.payload?.text?.toLowerCase()?.includes('please select from one of the following options')) {
+        // If the most recent message is outbound and is the exact QR message, allow it to show QRs
+        const text = mostRecentMessage.messageContent?.payload?.text || '';
+        const expectedText = `Please select from one of the following options so I can better help you:
+- Daily Passport
+- Data Passport
+- Worldwide Roaming
+- PAYG & RS
+- Roaming Troubleshooting`;
+        
+        if (mostRecentMessage.direction === 'outbound' && text.trim() === expectedText.trim()) {
           
           console.log('Most recent message on thread load has QRs:', mostRecentMessage.id);
           setLatestQRMessageId(mostRecentMessage.id);

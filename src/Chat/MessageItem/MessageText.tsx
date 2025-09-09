@@ -10,7 +10,12 @@ interface MessageTextProps {
   onQuickRepliesDetected?: (shouldShow: boolean) => void;
 }
 
-const SPECIFIC_MESSAGE = "Please select from one of the following options so I can better help you:";
+const SPECIFIC_MESSAGE = `Please select from one of the following options so I can better help you:
+- Daily Passport
+- Data Passport
+- Worldwide Roaming
+- PAYG & RS
+- Roaming Troubleshooting`;
 
 export const MessageText: FC<MessageTextProps> = ({ 
   text, 
@@ -22,24 +27,10 @@ export const MessageText: FC<MessageTextProps> = ({
   const [displayText, setDisplayText] = useState(text);
 
   useEffect(() => {
-    // Check if this is the specific message we want to handle
-    if (text && text.includes(SPECIFIC_MESSAGE)) {
-      // Remove the options list from the display text
-      const lines = text.split('\n');
-      const beforeOptions = [];
-      let foundOptions = false;
-      
-      for (const line of lines) {
-        if (line.trim().startsWith('- ')) {
-          foundOptions = true;
-          continue;
-        }
-        if (!foundOptions) {
-          beforeOptions.push(line);
-        }
-      }
-      
-      setDisplayText(beforeOptions.join('\n').trim());
+    // Check if this is the exact specific message we want to handle
+    if (text && text.trim() === SPECIFIC_MESSAGE.trim()) {
+      // For exact match, display only the first line (before the options)
+      setDisplayText("Please select from one of the following options so I can better help you:");
       if (onQuickRepliesDetected) {
         onQuickRepliesDetected(true);
       }

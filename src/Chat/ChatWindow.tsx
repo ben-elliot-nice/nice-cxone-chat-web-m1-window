@@ -86,7 +86,13 @@ export const ChatWindow: FC<ChatWindowProps> = ({ sdk, thread, threadName, onThr
   // Helper function to check if a message contains QR-triggering text
   const hasQuickReplyText = (message: ContentMessage): boolean => {
     const text = message.messageContent?.payload?.text || '';
-    return text.toLowerCase().includes('please select from one of the following options');
+    const expectedText = `Please select from one of the following options so I can better help you:
+- Daily Passport
+- Data Passport
+- Worldwide Roaming
+- PAYG & RS
+- Roaming Troubleshooting`;
+    return text.trim() === expectedText.trim();
   };
   
   // Persistence functions
