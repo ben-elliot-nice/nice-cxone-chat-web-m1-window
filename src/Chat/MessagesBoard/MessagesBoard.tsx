@@ -61,15 +61,12 @@ export const MessagesBoard: FC<MessagesBoardProps> = ({
   useEffect(() => {
     const messageArray = Array.from(messages.values());
     if (messageArray.length > 0) {
-      // Find the most recent actual message (not intro section)
-      const actualMessages = messageArray.filter(msg => isMessage(msg)).sort((a, b) => 
+      const actualMessages = messageArray.filter(msg => isMessage(msg)).sort((a, b) =>
         new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       );
-      
+
       if (actualMessages.length > 0) {
         const mostRecentMessage = actualMessages[actualMessages.length - 1];
-        
-        // If the most recent message is outbound and is the exact QR message, allow it to show QRs
         const text = mostRecentMessage.messageContent?.payload?.text || '';
         const expectedText = `Please select from one of the following options so I can better help you:
 - Daily Passport
@@ -77,16 +74,15 @@ export const MessagesBoard: FC<MessagesBoardProps> = ({
 - Worldwide Roaming
 - PAYG & RS
 - Roaming Troubleshooting`;
-        
+
         if (mostRecentMessage.direction === 'outbound' && text.trim() === expectedText.trim()) {
-          
           console.log('Most recent message on thread load has QRs:', mostRecentMessage.id);
           setLatestQRMessageId(mostRecentMessage.id);
           setShouldHideQuickReplies(false);
         }
       }
     }
-  }, [messages.size]); // Run when messages are first loaded
+  }, [messages.size]);
 
   const saveProcessedMessages = useCallback(() => {
     try {
@@ -95,11 +91,11 @@ export const MessagesBoard: FC<MessagesBoardProps> = ({
       console.warn('Failed to save processed QR messages:', e);
     }
   }, []);
-  
+
   const isIntroSection = (item: any): item is IntroSection => {
     return item && typeof item === 'object' && 'type' in item && (item.type === 'hotTopics' || item.type === 'popularQuestions');
   };
-  
+
   const messageArray = useMemo(
     () => Array.from(messages.values()),
     [messages.size],

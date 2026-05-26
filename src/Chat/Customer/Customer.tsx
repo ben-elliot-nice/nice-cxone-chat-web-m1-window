@@ -40,7 +40,7 @@ export const Customer: FC<CustomerProps> = ({ name, onChange, threadName, onThre
 
   const handleOnClose = useCallback(() => setDialogOpen(false), []);
   const handleThreadOnClose = useCallback(() => setThreadDialogOpen(false), []);
-  
+
   const handleSubmit = useCallback(() => {
     const newName = nameInputRef.current?.value;
     onChange(newName ?? '');
@@ -76,7 +76,7 @@ export const Customer: FC<CustomerProps> = ({ name, onChange, threadName, onThre
         </DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ mb: 2 }}>
-            {name 
+            {name
               ? 'Change how you appear to agents in this chat.'
               : 'Please enter your name to start the conversation. This helps agents provide you with personalized support.'}
           </DialogContentText>
@@ -132,11 +132,11 @@ export const Customer: FC<CustomerProps> = ({ name, onChange, threadName, onThre
           </Button>
         </DialogActions>
       </Dialog>
-      
-      <Box sx={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        gap: 1, 
+
+      <Box sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1,
         p: 1,
         backgroundColor: 'background.paper',
         borderBottom: '1px solid',
@@ -184,7 +184,7 @@ export const Customer: FC<CustomerProps> = ({ name, onChange, threadName, onThre
             </Button>
           </Tooltip>
         )}
-        
+
         {/* Thread Name Chip - Only show if onThreadNameChange is provided */}
         {onThreadNameChange && (
           <Tooltip title={threadName ? "Click to rename this conversation" : "Click to name this conversation"}>
@@ -209,7 +209,7 @@ export const Customer: FC<CustomerProps> = ({ name, onChange, threadName, onThre
             />
           </Tooltip>
         )}
-        
+
         {!name && (
           <Typography variant="caption" color="text.secondary">
             Required to start chat

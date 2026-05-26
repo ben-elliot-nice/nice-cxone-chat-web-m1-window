@@ -31,6 +31,7 @@ const chatSdkOptions: ChatSDKOptions = {
   isLivechat: true,
   securedSession: SecureSessions.ANONYMOUS,
   cacheStorage: null,
+  storage: null,
   onError: (error) => {
     console.error('Chat SDK error:', error);
   },
