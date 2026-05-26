@@ -5,21 +5,18 @@ import {
   SecureSessions,
   ChatSDKOptions,
 } from '@nice-devone/nice-cxone-chat-web-sdk';
-import '../Chat/Chat.css';
-import { FC, useCallback, useEffect, useRef, useState } from 'react';
-import BackIcon from '@mui/icons-material/ArrowBack';
+import { FC, useEffect, useRef, useState, useCallback } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-import { ThreadList } from './ThreadList';
-import { Link } from '@mui/material';
+import { M1ThreadMenu } from '../M1ChatWidget/M1ThreadMenu';
+import { M1ChatView } from '../M1ChatWidget/M1ChatView';
 import { getThreadIdStorageKey } from '../Chat/utils/getThreadIdStorageKey';
 import { STORAGE_CHAT_CUSTOMER_ID } from '../constants';
-import { MessengerWindow } from '../Messenger/MessengerWindow';
 
 // Initialize Chat SDK with required options
 const chatSdkOptions: ChatSDKOptions = {
   brandId: Number(import.meta.env.REACT_APP_BRAND_ID as string),
   channelId: import.meta.env.REACT_APP_CHANNEL_ID as string,
-  customerId: localStorage.getItem(STORAGE_CHAT_CUSTOMER_ID) || '',
+  customerId: localStorage.getItem(STORAGE_CHAT_CUSTOMER_ID) || crypto?.randomUUID(),
   // use your environment from  EnvironmentName enum
   environment: import.meta.env.REACT_APP_ENVIRONMENT,
   customEnvironment:
@@ -44,6 +41,7 @@ const chatSdkOptions: ChatSDKOptions = {
 export const MultiThreadMessenger: FC = () => {
   const [threadList, setThreadList] = useState<Array<ThreadView> | null>(null);
   const [selectedThreadId, selectThreadId] = useState<string | null>(null);
+  const [selectedThreadName, setSelectedThreadName] = useState<string | null>(null);
   const sdkRef = useRef<ChatSdk>(new ChatSdk(chatSdkOptions));
   const sdk = sdkRef.current;
 
@@ -60,17 +58,16 @@ export const MultiThreadMessenger: FC = () => {
     loadThreadList();
   }, [sdk]);
 
-  // try to load saved customer id and thread id
-  useEffect(() => {
-    handleLoadThreadList();
-  }, [handleLoadThreadList]);
-
   const handleThreadSelect = (idOnExternalPlatform: string) => {
     localStorage.setItem(
       getThreadIdStorageKey(sdk.channelId),
       idOnExternalPlatform,
     );
     selectThreadId(idOnExternalPlatform);
+    
+    // Find and set the thread name
+    const thread = threadList?.find(t => t.idOnExternalPlatform === idOnExternalPlatform);
+    setSelectedThreadName(thread?.threadName || null);
   };
 
   const handleThreadArchive = async (idOnExternalPlatform: string) => {
@@ -98,6 +95,7 @@ export const MultiThreadMessenger: FC = () => {
   const handleBackClick = () => {
     localStorage.setItem(getThreadIdStorageKey(sdk.channelId), '');
     selectThreadId(null);
+    setSelectedThreadName(null);
     handleLoadThreadList();
   };
 
@@ -110,12 +108,25 @@ export const MultiThreadMessenger: FC = () => {
       const result = await thread.setName(name);
 
       if (result) {
-        handleLoadThreadList();
+        // Update the thread name in the threadList state immediately
+        setThreadList(prevList => {
+          if (!prevList) return prevList;
+          return prevList.map(t => 
+            t.idOnExternalPlatform === idOnExternalPlatform 
+              ? { ...t, threadName: name }
+              : t
+          );
+        });
       } else {
         console.error('Thread name change failed');
       }
     }
   };
+
+  // try to load saved customer id and thread id
+  useEffect(() => {
+    handleLoadThreadList();
+  }, [handleLoadThreadList]);
 
   if (!threadList) {
     return (
@@ -126,30 +137,47 @@ export const MultiThreadMessenger: FC = () => {
   }
 
   if (selectedThreadId !== null) {
+    const thread = sdk.getThread(selectedThreadId);
+    if (!thread) {
+      // If thread doesn't exist, go back to menu
+      handleBackClick();
+      return null;
+    }
+    
     return (
-      <div>
-        <div>
-          <Link onClick={handleBackClick} className="multithread-back-link">
-            <BackIcon /> Back to thread list
-          </Link>
-        </div>
-
-        <MessengerWindow sdk={sdk} threadId={selectedThreadId} />
-      </div>
+      <M1ChatView 
+        sdk={sdk} 
+        thread={thread}
+        threadName={selectedThreadName || undefined}
+        onBack={handleBackClick}
+        onThreadNameChange={(name) => {
+          setSelectedThreadName(name);
+          // Update the thread name in the threadList state
+          setThreadList(prevList => {
+            if (!prevList) return prevList;
+            return prevList.map(t => 
+              t.idOnExternalPlatform === selectedThreadId 
+                ? { ...t, threadName: name }
+                : t
+            );
+          });
+        }}
+      />
     );
   }
 
+  const handleNewThread = () => {
+    const newThreadId = crypto.randomUUID();
+    handleThreadSelect(newThreadId);
+  };
+
   return (
-    <div className="chat-container">
-      <div className="chat-window">
-        <ThreadList
-          threads={threadList}
-          onThreadSelect={handleThreadSelect}
-          onThreadArchive={handleThreadArchive}
-          onThreadNameChange={handleThreadNameChange}
-          getThreadMetadata={handleLoadThreadMetadata}
-        />
-      </div>
-    </div>
+    <M1ThreadMenu
+      threads={threadList}
+      onThreadSelect={handleThreadSelect}
+      onNewThread={handleNewThread}
+      onThreadNameChange={handleThreadNameChange}
+      onThreadArchive={handleThreadArchive}
+    />
   );
 };

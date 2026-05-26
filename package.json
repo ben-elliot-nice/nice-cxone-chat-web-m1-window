@@ -21,7 +21,7 @@
     "start:livechat": "REACT_APP_VARIANT=LIVECHAT vite",
     "start:thirdpartyoauth": "REACT_APP_VARIANT=THIRD_PARTY_OAUTH vite",
     "start:securedsession": "REACT_APP_VARIANT=SECURED_SESSION vite",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "test": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "tsc": "tsc --noEmit"

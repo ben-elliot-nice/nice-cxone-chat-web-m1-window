@@ -1,9 +1,9 @@
-import { Card, CardContent, CardHeader } from '@mui/material';
 import './MessageItem.css';
 import { getAuthor, Message } from '@nice-devone/nice-cxone-chat-web-sdk';
-import { FC } from 'react';
+import { FC, useState, useCallback } from 'react';
 import { MessageAttachments } from './MessageAttachments.tsx';
 import { MessageText } from './MessageText.tsx';
+import { QuickReplyOptions } from './QuickReplyOptions';
 import {
   MessageRichContent,
   Postback,
@@ -13,36 +13,82 @@ import { resolveChatMessageText } from '../utils/resolveChatMessageText.ts';
 interface MessageItemProps {
   message: Message;
   onAction: (postback: Postback) => void;
+  shouldHideQuickReplies?: boolean;
+  onQuickReply?: (option: string) => void;
+  onQuickRepliesDetected?: (shouldShow: boolean, messageId?: string) => void;
 }
 
-export const MessageItem: FC<MessageItemProps> = ({ message, onAction }) => {
+const OPTIONS = [
+  "Daily Passport",
+  "Data Passport", 
+  "Worldwide Roaming",
+  "PAYG & RS",
+  "Roaming Troubleshooting"
+];
+
+export const MessageItem: FC<MessageItemProps> = ({ message, onAction, shouldHideQuickReplies, onQuickReply, onQuickRepliesDetected }) => {
+  const isCustomer = message.direction === 'inbound';
+  const author = getAuthor(message);
+  const timestamp = new Date(message.createdAt).toLocaleTimeString([], { 
+    hour: '2-digit', 
+    minute: '2-digit' 
+  });
+  
+  const [showQuickReplies, setShowQuickReplies] = useState(false);
+
+  const handleQuickRepliesDetected = useCallback((shouldShow: boolean) => {
+    setShowQuickReplies(shouldShow);
+    // Also notify the parent MessagesBoard so it can reset global hide state
+    if (onQuickRepliesDetected) {
+      onQuickRepliesDetected(shouldShow, message.id);
+    }
+  }, [onQuickRepliesDetected, message.id]);
+
+  const handleQuickReply = useCallback((option: string) => {
+    setShowQuickReplies(false);
+    if (onQuickReply) {
+      onQuickReply(option);
+    }
+  }, [onQuickReply]);
+
   return (
-    <div
-      className={`message-item ${
-        message.direction === 'outbound'
-          ? 'message-item__outbound'
-          : 'message-item__inbound'
-      }`}
-    >
-      <Card
-        className="message-item-card"
+    <div className={`message-container ${isCustomer ? 'user-message-container' : 'bot-message-container'}`}>
+      <div
+        className={`message ${isCustomer ? 'user-message' : 'bot-message'}`}
         data-testid="message-item"
         data-id={message.id}
       >
-        <CardHeader
-          subheader={getAuthor(message)}
-          subheaderTypographyProps={{ fontSize: '12px' }}
-        />
-        <CardContent>
+        <div className="message-content">
           <MessageAttachments attachments={message.attachments} />
-          <MessageText text={resolveChatMessageText(message)} />
+          <MessageText
+            text={message.messageContent.payload.text}
+            messageId={message.id}
+            onQuickReply={onQuickReply}
+            shouldHideQuickReplies={shouldHideQuickReplies}
+            onQuickRepliesDetected={handleQuickRepliesDetected}
+          />
           <MessageRichContent message={message} onAction={onAction} />
-        </CardContent>
-        <CardHeader
-          subheader={new Date(message.createdAt).toLocaleString()}
-          subheaderTypographyProps={{ fontSize: '12px' }}
-        />
-      </Card>
+        </div>
+      </div>
+      
+      {/* Show timestamp only when quick replies are NOT showing */}
+      {!(showQuickReplies && !shouldHideQuickReplies && !isCustomer) && (
+        <div className="message-timestamp">{timestamp}</div>
+      )}
+      
+      {/* Quick replies outside the message container, only for bot messages */}
+      {!isCustomer && showQuickReplies && !shouldHideQuickReplies && (
+        <div style={{ 
+          marginLeft: '0',
+          maxWidth: '100%',
+          width: '100%',
+        }}>
+          <QuickReplyOptions 
+            options={OPTIONS} 
+            onOptionClick={handleQuickReply}
+          />
+        </div>
+      )}
     </div>
   );
 };
